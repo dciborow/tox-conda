@@ -16,6 +16,10 @@ class CondaDepOption(DepOption):
     name = "conda_deps"
     help = "each line specifies a conda dependency in pip/setuptools format"
 
+class CondaEnvOption(DepOption):
+    name = "conda_env"
+    help = "Conda ENV File path"
+
 
 def get_py_version(envconfig, action):
     # Try to use basepython
@@ -133,6 +137,18 @@ def install_conda_deps(venv, action, basepath, envdir):
     args += [venv.envconfig.conda_python] + conda_deps
     venv._pcall(args, venv=False, action=action, cwd=basepath)
 
+def install_conda_env(venv, action, basepath, envdir):
+    conda_exe = venv.envconfig.conda_exe
+    # Account for the fact that we have a list of DepOptions
+
+    action.setactivity("installcondadeps", ", ".join(conda_deps))
+
+    args = [conda_exe, "env", "update", "-f", venv.envconfig.conda_env]
+    for channel in venv.envconfig.conda_channels:
+        args += ["--channel", channel]
+
+    venv._pcall(args, venv=False, action=action, cwd=basepath)
+
 
 @hookimpl
 def tox_testenv_install_deps(venv, action):
@@ -149,7 +165,9 @@ def tox_testenv_install_deps(venv, action):
         # tox_configure (see comment there for rationale). We don't want them
         # to be present when we call pip install
         venv.envconfig.deps = venv.envconfig.deps[: -1 * num_conda_deps]
-
+    if venv.envconfig.conda_env
+        install_conda_env(venv, action, basepath, envdir)
+        return True
     # Install dependencies from pypi here
     tox.venv.tox_testenv_install_deps(venv=venv, action=action)
     # Restore for the config file
