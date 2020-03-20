@@ -110,7 +110,7 @@ def tox_testenv_create(venv, action):
     venv._venv_lookup = types.MethodType(venv_lookup, venv)
 
     if venv.envconfig.conda_env:
-        args = [conda_exe, "create", "--yes", "-f", venv.envconfig.conda_env[0]]
+        args = [conda_exe, "env", "create", "-f", venv.envconfig.conda_env[0]]
     else:
         args = [conda_exe, "create", "--yes", "-p", envdir]
         for channel in venv.envconfig.conda_channels:
