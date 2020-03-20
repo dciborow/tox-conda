@@ -111,7 +111,7 @@ def tox_testenv_create(venv, action):
 
     if venv.envconfig.conda_env:
         try:
-            args = [conda_exe, "env", "create", "-f", venv.envconfig.conda_env[0]]
+            args = [conda_exe, "env", "create", "--force", "-f", venv.envconfig.conda_env[0]]
         except InvocationError:
             pass
             # args = [conda_exe, "env", "update", "-f", venv.envconfig.conda_env[0]]
