@@ -109,10 +109,13 @@ def tox_testenv_create(venv, action):
     # environments on Windows.
     venv._venv_lookup = types.MethodType(venv_lookup, venv)
 
-    args = [conda_exe, "create", "--yes", "-p", envdir]
-    for channel in venv.envconfig.conda_channels:
-        args += ["--channel", channel]
-    args += [python]
+    if venv.envconfig.conda_env:
+        args = [conda_exe, "create", "--yes", "-f", venv.envconfig.conda_env[0]]
+    else:
+        args = [conda_exe, "create", "--yes", "-p", envdir]
+        for channel in venv.envconfig.conda_channels:
+            args += ["--channel", channel]
+        args += [python]
     venv._pcall(args, venv=False, action=action, cwd=basepath)
 
     venv.envconfig.conda_python = python
@@ -138,6 +141,17 @@ def install_conda_deps(venv, action, basepath, envdir):
     args += [venv.envconfig.conda_python] + conda_deps
     venv._pcall(args, venv=False, action=action, cwd=basepath)
 
+def load_conda_env(venv, action, basepath, envdir):
+    conda_exe = venv.envconfig.conda_exe
+    # Account for the fact that we have a list of DepOptions
+
+    action.setactivity("installcondadeps", f"{venv.envconfig.conda_env[0]}")
+    from conda_env.env import load_from_directory
+    env = load_from_file(f"../{venv.envconfig.conda_env[0]}")
+    venv.envconfig.conda_deps = env.dependencies['conda']
+    venv.envconfig.deps = env.dependencies['pip']
+
+
 def install_conda_env(venv, action, basepath, envdir):
     conda_exe = venv.envconfig.conda_exe
     # Account for the fact that we have a list of DepOptions
@@ -153,6 +167,7 @@ def install_conda_env(venv, action, basepath, envdir):
 def tox_testenv_install_deps(venv, action):
     basepath = venv.path.dirpath()
     envdir = venv.envconfig.envdir
+
     # Save for later : we will need it for the config file
     import copy
     saved_deps = copy.deepcopy(venv.envconfig.deps)
@@ -164,9 +179,6 @@ def tox_testenv_install_deps(venv, action):
         # tox_configure (see comment there for rationale). We don't want them
         # to be present when we call pip install
         venv.envconfig.deps = venv.envconfig.deps[: -1 * num_conda_deps]
-    if venv.envconfig.conda_env:
-        install_conda_env(venv, action, basepath, envdir)
-        return True
     # Install dependencies from pypi here
     tox.venv.tox_testenv_install_deps(venv=venv, action=action)
     # Restore for the config file
