@@ -142,7 +142,7 @@ def install_conda_env(venv, action, basepath, envdir):
     conda_exe = venv.envconfig.conda_exe
     # Account for the fact that we have a list of DepOptions
 
-    action.setactivity("installcondadeps", f", {venv.envconfig.conda_env}")
+    action.setactivity("installcondadeps", f"{venv.envconfig.conda_env[0]}")
 
     args = [conda_exe, "env", "update", "-p", envdir, "-f", "../environment.yml"]
 
