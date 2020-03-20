@@ -144,9 +144,7 @@ def install_conda_env(venv, action, basepath, envdir):
 
     action.setactivity("installcondadeps", ", ")
 
-    args = [conda_exe, "env", "update", "-f", venv.envconfig.conda_env]
-    for channel in venv.envconfig.conda_channels:
-        args += ["--channel", channel]
+    args = [conda_exe, "env", "update", "-f", "environment.yml"]
 
     venv._pcall(args, venv=False, action=action, cwd=basepath)
 
