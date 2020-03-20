@@ -46,6 +46,7 @@ def get_py_version(envconfig, action):
 @hookimpl
 def tox_addoption(parser):
     parser.add_testenv_attribute_obj(CondaDepOption())
+    parser.add_testenv_attribute_obj(CondaEnvOption())
 
     parser.add_testenv_attribute(
         name="conda_channels", type="line-list", help="each line specifies a conda channel"
